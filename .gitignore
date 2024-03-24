@@ -40,20 +40,20 @@ Examples/Stereo-Inertial/stereo_inertial_realsense_t265
 Examples/Stereo-Inertial/stereo_inertial_realsense_D435i
 
 
-Examples/ROS/ORB_SLAM3/Mono
-Examples/ROS/ORB_SLAM3/Mono_Inertial
-Examples/ROS/ORB_SLAM3/MonoAR
-Examples/ROS/ORB_SLAM3/RGBD
-Examples/ROS/ORB_SLAM3/Stereo
-Examples/ROS/ORB_SLAM3/Stereo_Inertial
+Examples/ROS/orb_slam-3/Mono
+Examples/ROS/orb_slam-3/Mono_Inertial
+Examples/ROS/orb_slam-3/MonoAR
+Examples/ROS/orb_slam-3/RGBD
+Examples/ROS/orb_slam-3/Stereo
+Examples/ROS/orb_slam-3/Stereo_Inertial
 
 Examples/Calibration/recorder_realsense_D435i
 
 Examples/Tests/viewer_dataset
 Examples/Tests/sophus_test
 
-Examples/ROS/ORB_SLAM3/CMakeLists.txt.user
-Examples/ROS/ORB_SLAM3/build/
+Examples/ROS/orb_slam-3/CMakeLists.txt.user
+Examples/ROS/orb_slam-3/build/
 
 KeyFrameTrajectory.txt
 CameraTrajectory.txt
@@ -80,7 +80,11 @@ LocalMapTimeStats.txt
 TrackLocalMapStats.txt
 TrackingTimeStats.txt
 time*
+Thirdparty/g2o/g2o/stuff/timeutil.cpp
+Thirdparty/g2o/g2o/stuff/timeutil.h
 Time*
+Thirdparty/DBoW2/DUtils/Timestamp.cpp
+Thirdparty/DBoW2/DUtils/Timestamp.h
 Table_Euroc
 Table_TUMVI_rooms/
 *.pyc

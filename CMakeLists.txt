@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(ORB_SLAM3)
+project(orb_slam-3)
 
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE Release)
@@ -380,6 +380,6 @@ if(realsense2_FOUND)
 endif()
 
 # include ROS
-# source ROS and add the global path Examples_old/ROS/ORB_SLAM3 to ROS_PACKAGE_PATH env variable
-# export ROS_PACKAGE_PATH={ROS_PACKAGE_PATH}:path/Examples_old/ROS/ORB_SLAM3/  
-add_subdirectory(${PROJECT_SOURCE_DIR}/Examples_old/ROS/ORB_SLAM3/)
+# source ROS and add the global path Examples_old/ROS/orb_slam-3 to ROS_PACKAGE_PATH env variable
+# export ROS_PACKAGE_PATH={ROS_PACKAGE_PATH}:path/Examples_old/ROS/orb_slam-3/  
+add_subdirectory(${PROJECT_SOURCE_DIR}/Examples_old/ROS/orb_slam-3/)
