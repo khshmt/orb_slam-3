@@ -381,5 +381,5 @@ endif()
 
 # include ROS
 # source ROS and add the global path Examples_old/ROS/ORB_SLAM3 to ROS_PACKAGE_PATH env variable
-# export ROS_PACKAGE_PATH={ROS_PACKAGE_PATH}:path/Examples_old/ROS/ORB_SLAM3/  
+# export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:path/Examples_old/ROS/ORB_SLAM3/  
 add_subdirectory(${PROJECT_SOURCE_DIR}/Examples_old/ROS/ORB_SLAM3/)
