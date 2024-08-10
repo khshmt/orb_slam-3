@@ -129,7 +129,7 @@ int main(int argc, char **argv)
     cout.precision(17);
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::IMU_STEREO, false);
+    ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::IMU_STEREO, true);
 
     cv::Mat imLeft, imRight;
     for (seq = 0; seq<num_seq; seq++)
@@ -263,6 +263,15 @@ void LoadImages(const string &strPathLeft, const string &strPathRight, const str
             vTimeStamps.push_back(t/1e9);
 
         }
+    }
+    for (auto &strImgLeft : vstrImageLeft) {
+      strImgLeft.erase(std::remove(strImgLeft.begin(), strImgLeft.end(), '\r'),
+                       strImgLeft.end());
+    }
+    for (auto &strImgRight : vstrImageRight) {
+      strImgRight.erase(
+          std::remove(strImgRight.begin(), strImgRight.end(), '\r'),
+          strImgRight.end());
     }
 }
 
