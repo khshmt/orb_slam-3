@@ -12,20 +12,20 @@ CMakeLists_modified.txt
 
 Examples/RGB-D/bin/
 
-Examples/RGB-D-Inertial/bin
+Examples/RGB-D-Inertial/bin/
 
-Examples/Monocular/bin
+Examples/Monocular/bin/
 
-Examples/Stereo/bin
+Examples/Stereo/bin/
 
-Examples/Monocular-Inertial/bin
+Examples/Monocular-Inertial/bin/
 
-Examples/Stereo-Inertial/bin
+Examples/Stereo-Inertial/bin/
 
 
-Examples/ROS/orb_slam-3/bin
+Examples/ROS/orb_slam-3/bin/
 
-Examples/Calibration/bin
+Examples/Calibration/bin/
 
 Examples/Tests/viewer_dataset
 Examples/Tests/sophus_test
