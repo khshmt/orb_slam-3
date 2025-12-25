@@ -10,50 +10,28 @@
 CMakeLists.txt.user
 CMakeLists_modified.txt
 
-Examples/RGB-D/rgbd_tum
-Examples/RGB-D/rgbd_realsense_D435i
+Examples/RGB-D/bin/
 
-Examples/RGB-D-Inertial/rgbd_inertial_realsense_D435i
+Examples/RGB-D-Inertial/bin/
 
-Examples/Monocular/mono_realsense_D435i
-Examples/Monocular/mono_euroc
-Examples/Monocular/mono_kitti
-Examples/Monocular/mono_tum
-Examples/Monocular/mono_tum_vi
-Examples/Monocular/mono_realsense_t265
+Examples/Monocular/bin/
 
-Examples/Stereo/stereo_euroc
-Examples/Stereo/stereo_kitti
-Examples/Stereo/stereo_tum_vi
-Examples/Stereo/stereo_realsense_t265
-Examples/Stereo/stereo_realsense_D435i
+Examples/Stereo/bin/
 
-Examples/Monocular-Inertial/mono_inertial_euroc
-Examples/Monocular-Inertial/mono_inertial_tum_vi
-Examples/Monocular-Inertial/mono_inertial_realsense_t265
-Examples/Monocular-Inertial/mono_inertial_realsense_D435i
-Examples/Monocular-Inertial/mono_inertial_realsense_D435i_2
+Examples/Monocular-Inertial/bin/
 
-Examples/Stereo-Inertial/stereo_inertial_euroc
-Examples/Stereo-Inertial/stereo_inertial_tum_vi
-Examples/Stereo-Inertial/stereo_inertial_realsense_t265
-Examples/Stereo-Inertial/stereo_inertial_realsense_D435i
+Examples/Stereo-Inertial/bin/
 
 
-Examples/ROS/ORB_SLAM3/Mono
-Examples/ROS/ORB_SLAM3/Mono_Inertial
-Examples/ROS/ORB_SLAM3/MonoAR
-Examples/ROS/ORB_SLAM3/RGBD
-Examples/ROS/ORB_SLAM3/Stereo
-Examples/ROS/ORB_SLAM3/Stereo_Inertial
+Examples/ROS/orb_slam-3/bin/
 
-Examples/Calibration/recorder_realsense_D435i
+Examples/Calibration/bin/
 
 Examples/Tests/viewer_dataset
 Examples/Tests/sophus_test
 
-Examples/ROS/ORB_SLAM3/CMakeLists.txt.user
-Examples/ROS/ORB_SLAM3/build/
+Examples/ROS/orb_slam-3/CMakeLists.txt.user
+Examples/ROS/orb_slam-3/build/
 
 Examples_old/ROS/ORB_SLAM3/bin/
 
@@ -82,7 +60,11 @@ LocalMapTimeStats.txt
 TrackLocalMapStats.txt
 TrackingTimeStats.txt
 time*
+Thirdparty/g2o/g2o/stuff/timeutil.cpp
+Thirdparty/g2o/g2o/stuff/timeutil.h
 Time*
+Thirdparty/DBoW2/DUtils/Timestamp.cpp
+Thirdparty/DBoW2/DUtils/Timestamp.h
 Table_Euroc
 Table_TUMVI_rooms/
 *.pyc
