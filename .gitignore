@@ -59,10 +59,10 @@ LBA_Stats.txt
 LocalMapTimeStats.txt
 TrackLocalMapStats.txt
 TrackingTimeStats.txt
-time*
+#time*
 #Thirdparty/g2o/g2o/stuff/timeutil.cpp
 #Thirdparty/g2o/g2o/stuff/timeutil.h
-Time*
+#Time*
 #Thirdparty/DBoW2/DUtils/Timestamp.cpp
 #Thirdparty/DBoW2/DUtils/Timestamp.h
 Table_Euroc
