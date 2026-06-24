@@ -272,6 +272,7 @@ void LoopClosing::Run()
 
 #endif
                         CorrectLoop();
+                        exportLoopClosureInfo(mpCurrentKF, mpLoopMatchedKF, mg2oLoopScw, mnLoopNumCoincidences, mvpLoopMPs, mvpLoopMatchedMPs);
 #ifdef REGISTER_TIMES
                         std::chrono::steady_clock::time_point time_EndLoop = std::chrono::steady_clock::now();
 
@@ -280,6 +281,7 @@ void LoopClosing::Run()
 #endif
 
                         mnNumCorrection += 1;
+
                     }
 
                     // Reset all variables
@@ -2535,5 +2537,182 @@ bool LoopClosing::isFinished()
     return mbFinished;
 }
 
+
+void LoopClosing::exportLoopClosureInfo(KeyFrame* pCurrentKF, KeyFrame* pMatchedKF, g2o::Sim3 &g2oScw, int nNumCoincidences,
+                                std::vector<MapPoint*> &vpMPs, std::vector<MapPoint*> &vpMatchedMPs) 
+{
+    // ------------------------------------------------------------------
+    // Static file handles — opened once, appended on every BA call.
+    // kf_id is logged so you can keep only the last entry per keyframe
+    // in post-processing (the most refined after the final global BA).
+    // ------------------------------------------------------------------
+    static std::ofstream kfFile;
+    static std::ofstream preintFile;
+    static std::ofstream covisFile;
+    static std::ofstream loopEdgeFile;
+    openOnce(kfFile,
+             "keyframes_loopClosing.csv",
+             "#t_ns,x,y,z,qx,qy,qz,qw");
+
+    openOnce(preintFile,
+             "imuPreint_loopClosing.csv",
+             "#kf_id,t_start_ns,t_end_ns,dt_s,"
+             "dPx,dPy,dPz,"
+             "dVx,dVy,dVz,"
+             "dRx,dRy,dRz,"
+             "var_dRx,var_dRy,var_dRz,"
+             "var_dVx,var_dVy,var_dVz,"
+             "var_dPx,var_dPy,var_dPz");
+ 
+    openOnce(covisFile,
+             "covisibility_loopClosing.csv",
+             "#kf_id_i,kf_id_j,shared_map_points,t_i_ns,t_j_ns");
+ 
+    openOnce(loopEdgeFile,
+             "loop_edges_loopClosing.csv",
+             "#kf_id_i,kf_id_j,t_i_ns,t_j_ns");
+ 
+    // ------------------------------------------------------------------
+    // Track which loop edges have been written to avoid duplicates.
+    // Loop edges are fixed after loop closing — they do not change with BA.
+    // ------------------------------------------------------------------
+    static std::unordered_set<long long> writtenLoopEdges;
+    Map* pLoopMap = mpCurrentKF->GetMap();
+    auto KFs = pLoopMap->GetAllKeyFrames();
+    std::sort(KFs.begin(), KFs.end(), KeyFrame::lId);
+    
+    // ------------------------------------------------------------------
+    // Iterate over all keyframes in the loop map
+    // ------------------------------------------------------------------
+    for (KeyFrame* pKFi : KFs)
+    {
+        if (pKFi->isBad()) continue;
+        // ==============================================================
+        // 1. Keyframes trajectory export
+        // ==============================================================
+        if (pKFi->mpImuPreintegrated != nullptr) {
+          Sophus::SE3f Twb = pKFi->GetImuPose();
+          Eigen::Quaternionf q = Twb.unit_quaternion();
+          Eigen::Vector3f twb = Twb.translation();
+          kfFile << setprecision(6) << 1e9 * pKFi->mTimeStamp << " "
+                 << setprecision(9) << twb(0) << " " << twb(1) << " " << twb(2)
+                 << " " << q.x() << " " << q.y() << " " << q.z() << " " << q.w()
+                 << endl;
+
+        } else {
+          Sophus::SE3f Twc = pKFi->GetPoseInverse();
+          Eigen::Quaternionf q = Twc.unit_quaternion();
+          Eigen::Vector3f t = Twc.translation();
+          kfFile << setprecision(6) << 1e9 * pKFi->mTimeStamp << " "
+                 << setprecision(9) << t(0) << " " << t(1) << " " << t(2) << " "
+                 << q.x() << " " << q.y() << " " << q.z() << " " << q.w()
+                 << endl;
+        }
+        // ==============================================================
+        // 1. Preintegration export
+        // ==============================================================
+        if (pKFi->mpImuPreintegrated != nullptr && pKFi->mPrevKF != nullptr)
+        {
+            const Eigen::Vector3f dP =
+                pKFi->mpImuPreintegrated->GetUpdatedDeltaPosition();
+            const Eigen::Vector3f dV =
+                pKFi->mpImuPreintegrated->GetUpdatedDeltaVelocity();
+            const Eigen::Matrix3f dR =
+                pKFi->mpImuPreintegrated->GetUpdatedDeltaRotation();
+ 
+            // Rotation vector (Lie algebra log of dR)
+            const Eigen::Vector3f dRv =
+                Sophus::SO3<float>(dR).log();
+ 
+            // Covariance diagonal
+            const auto& C = pKFi->mpImuPreintegrated->C;
+ 
+            preintFile
+                << pKFi->mnId                            << ','
+                << std::setprecision(0)
+                << 1e9 * pKFi->mPrevKF->mTimeStamp      << ','
+                << 1e9 * pKFi->mTimeStamp                << ','
+                << std::setprecision(9)
+                << pKFi->mpImuPreintegrated->dT          << ','
+                // delta position
+                << dP[0] << ',' << dP[1] << ',' << dP[2] << ','
+                // delta velocity
+                << dV[0] << ',' << dV[1] << ',' << dV[2] << ','
+                // delta rotation (Lie algebra)
+                << dRv[0] << ',' << dRv[1] << ',' << dRv[2] << ','
+                // covariance diagonal
+                << std::scientific << std::setprecision(6)
+                << C(0,0) << ',' << C(1,1) << ',' << C(2,2) << ','   // dR
+                << C(3,3) << ',' << C(4,4) << ',' << C(5,5) << ','   // dV
+                << C(6,6) << ',' << C(7,7) << ',' << C(8,8) << '\n'; // dP
+ 
+            preintFile.flush();
+        }
+ 
+        // ==============================================================
+        // 2. Covisibility edges export
+        //    GetCovisiblesByWeight returns KFs sorted by descending weight.
+        //    We export all edges above COVIS_WEIGHT_THRESHOLD.
+        //    Use mnId ordering to avoid writing each pair twice.
+        // ==============================================================
+        const vector<KeyFrame*> vpCovisKFs =
+            pKFi->GetCovisiblesByWeight(COVIS_WEIGHT_THRESHOLD);
+ 
+        for (KeyFrame* pKFj : vpCovisKFs)
+        {
+            if (pKFj->isBad())               continue;
+            if (pKFj->mnId <= pKFi->mnId)    continue;  // write each pair once
+ 
+            const int nShared = pKFi->GetWeight(pKFj);
+ 
+            covisFile
+                << pKFi->mnId << ','
+                << pKFj->mnId << ','
+                << nShared    << ','
+                << std::setprecision(0)
+                << 1e9 * pKFi->mTimeStamp << ','
+                << 1e9 * pKFj->mTimeStamp << '\n';
+        }
+        covisFile.flush();
+ 
+        // ==============================================================
+        // 3. Loop closure edges export
+        //    GetLoopEdges() returns the set of KFs connected to pKFi
+        //    specifically through loop closure (not regular covisibility).
+        //    These are the highest-value edges for your reconstruction
+        //    because they represent verified place recognition matches.
+        //
+        //    These edges are immutable after loop closing — they do not
+        //    change with BA — so we track written pairs to avoid duplicates
+        //    across multiple BA calls.
+        // ==============================================================
+        const set<KeyFrame*> loopEdges = pKFi->GetLoopEdges();
+ 
+        for (KeyFrame* pKFj : loopEdges)
+        {
+            if (pKFj->isBad()) continue;
+ 
+            // Create a unique key for this pair (order-independent)
+            const long unsigned int id_min = std::min(pKFi->mnId, pKFj->mnId);
+            const long unsigned int id_max = std::max(pKFi->mnId, pKFj->mnId);
+            const long long edgeKey =
+                static_cast<long long>(id_min) * 1000000LL +
+                static_cast<long long>(id_max);
+ 
+            if (writtenLoopEdges.count(edgeKey)) continue;  // already written
+            writtenLoopEdges.insert(edgeKey);
+ 
+            loopEdgeFile
+                << id_min << ','
+                << id_max << ','
+                << std::setprecision(0)
+                << 1e9 * pKFi->mTimeStamp << ','
+                << 1e9 * pKFj->mTimeStamp << '\n';
+        }
+        loopEdgeFile.flush();
+ 
+    } // end keyframe loop
+ 
+} // end logging block
 
 } //namespace ORB_SLAM

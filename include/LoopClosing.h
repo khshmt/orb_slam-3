@@ -41,6 +41,16 @@ class LocalMapping;
 class KeyFrameDatabase;
 class Map;
 
+static constexpr int COVIS_WEIGHT_THRESHOLD = 100;
+static void openOnce(std::ofstream& f,
+                     const std::string& path,
+                     const std::string& header) {
+    if (!f.is_open()) {
+        f.open(path, std::ios::out);
+        f << header << '\n';
+        f << std::fixed;
+    }
+}
 
 class LoopClosing
 {
@@ -138,7 +148,8 @@ protected:
     void SearchAndFuse(const vector<KeyFrame*> &vConectedKFs, vector<MapPoint*> &vpMapPoints);
 
     void CorrectLoop();
-
+    void exportLoopClosureInfo(KeyFrame* pCurrentKF, KeyFrame* pMatchedKF, g2o::Sim3 &g2oScw, int nNumCoincidences,
+                                std::vector<MapPoint*> &vpMPs, std::vector<MapPoint*> &vpMatchedMPs);
     void MergeLocal();
     void MergeLocal2();
 

@@ -66,8 +66,9 @@ Eigen::Matrix3f NormalizeRotation(const Eigen::Matrix3f &R)
 // ---------------------------------------------------------------------------
 // RightJacobianSO3
 // ---------------------------------------------------------------------------
+// Right Jacobian is used to track how changing rotation angles (in the tangent space of SO(3)) affects the rotation matrix itself.
+// 
 // Computes the Right Jacobian of SO(3) at the rotation vector v = [x, y, z].
-//
 // The Right Jacobian Jr(v) relates a small perturbation delta_v in the
 // rotation vector to the corresponding perturbation in the rotation matrix:
 //
