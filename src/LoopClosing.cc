@@ -2551,11 +2551,11 @@ void LoopClosing::exportLoopClosureInfo(KeyFrame* pCurrentKF, KeyFrame* pMatched
     static std::ofstream covisFile;
     static std::ofstream loopEdgeFile;
     openOnce(kfFile,
-             "keyframes_loopClosing.csv",
+             "loopClosureInfo/keyframes_loopClosing.csv",
              "#t_ns,x,y,z,qx,qy,qz,qw");
 
     openOnce(preintFile,
-             "imuPreint_loopClosing.csv",
+             "loopClosureInfo/imuPreint_loopClosing.csv",
              "#kf_id,t_start_ns,t_end_ns,dt_s,"
              "dPx,dPy,dPz,"
              "dVx,dVy,dVz,"
@@ -2565,13 +2565,15 @@ void LoopClosing::exportLoopClosureInfo(KeyFrame* pCurrentKF, KeyFrame* pMatched
              "var_dPx,var_dPy,var_dPz");
  
     openOnce(covisFile,
-             "covisibility_loopClosing.csv",
+             "loopClosureInfo/covisibility_loopClosing.csv",
              "#kf_id_i,kf_id_j,shared_map_points,t_i_ns,t_j_ns");
- 
-    openOnce(loopEdgeFile,
-             "loop_edges_loopClosing.csv",
-             "#kf_id_i,kf_id_j,t_i_ns,t_j_ns");
- 
+
+    openOnce(loopEdgeFile, "loopClosureInfo/loop_edges_loopClosing.csv",
+             "#kf_id_i,kf_id_j,t_i_ns,t_j_ns,"
+             "rel_tx,rel_ty,rel_tz,"
+             "rel_qx,rel_qy,rel_qz,rel_qw,"
+             "rel_rx,rel_ry,rel_rz");
+
     // ------------------------------------------------------------------
     // Track which loop edges have been written to avoid duplicates.
     // Loop edges are fixed after loop closing — they do not change with BA.
@@ -2594,22 +2596,22 @@ void LoopClosing::exportLoopClosureInfo(KeyFrame* pCurrentKF, KeyFrame* pMatched
           Sophus::SE3f Twb = pKFi->GetImuPose();
           Eigen::Quaternionf q = Twb.unit_quaternion();
           Eigen::Vector3f twb = Twb.translation();
-          kfFile << setprecision(6) << 1e9 * pKFi->mTimeStamp << " "
-                 << setprecision(9) << twb(0) << " " << twb(1) << " " << twb(2)
-                 << " " << q.x() << " " << q.y() << " " << q.z() << " " << q.w()
-                 << endl;
+          kfFile << setprecision(6) << 1e9 * pKFi->mTimeStamp << ' '
+                 << setprecision(9) << twb(0) << ' ' << twb(1) << ' ' << twb(2)
+                 << ' ' << q.x() << ' ' << q.y() << ' ' << q.z() << ' ' << q.w()
+                 << '\n';
 
         } else {
           Sophus::SE3f Twc = pKFi->GetPoseInverse();
           Eigen::Quaternionf q = Twc.unit_quaternion();
           Eigen::Vector3f t = Twc.translation();
-          kfFile << setprecision(6) << 1e9 * pKFi->mTimeStamp << " "
-                 << setprecision(9) << t(0) << " " << t(1) << " " << t(2) << " "
-                 << q.x() << " " << q.y() << " " << q.z() << " " << q.w()
-                 << endl;
+          kfFile << setprecision(6) << 1e9 * pKFi->mTimeStamp << ' '
+                 << setprecision(9) << t(0) << ' ' << t(1) << ' ' << t(2) << ' '
+                 << q.x() << ' ' << q.y() << ' ' << q.z() << ' ' << q.w()
+                 << '\n';
         }
         // ==============================================================
-        // 1. Preintegration export
+        // 2. Preintegration export
         // ==============================================================
         if (pKFi->mpImuPreintegrated != nullptr && pKFi->mPrevKF != nullptr)
         {
@@ -2629,7 +2631,7 @@ void LoopClosing::exportLoopClosureInfo(KeyFrame* pCurrentKF, KeyFrame* pMatched
  
             preintFile
                 << pKFi->mnId                            << ','
-                << std::setprecision(0)
+                << std::setprecision(6)
                 << 1e9 * pKFi->mPrevKF->mTimeStamp      << ','
                 << 1e9 * pKFi->mTimeStamp                << ','
                 << std::setprecision(9)
@@ -2641,7 +2643,6 @@ void LoopClosing::exportLoopClosureInfo(KeyFrame* pCurrentKF, KeyFrame* pMatched
                 // delta rotation (Lie algebra)
                 << dRv[0] << ',' << dRv[1] << ',' << dRv[2] << ','
                 // covariance diagonal
-                << std::scientific << std::setprecision(6)
                 << C(0,0) << ',' << C(1,1) << ',' << C(2,2) << ','   // dR
                 << C(3,3) << ',' << C(4,4) << ',' << C(5,5) << ','   // dV
                 << C(6,6) << ',' << C(7,7) << ',' << C(8,8) << '\n'; // dP
@@ -2650,7 +2651,7 @@ void LoopClosing::exportLoopClosureInfo(KeyFrame* pCurrentKF, KeyFrame* pMatched
         }
  
         // ==============================================================
-        // 2. Covisibility edges export
+        // 3. Covisibility edges export
         //    GetCovisiblesByWeight returns KFs sorted by descending weight.
         //    We export all edges above COVIS_WEIGHT_THRESHOLD.
         //    Use mnId ordering to avoid writing each pair twice.
@@ -2669,14 +2670,14 @@ void LoopClosing::exportLoopClosureInfo(KeyFrame* pCurrentKF, KeyFrame* pMatched
                 << pKFi->mnId << ','
                 << pKFj->mnId << ','
                 << nShared    << ','
-                << std::setprecision(0)
+                << std::setprecision(6)
                 << 1e9 * pKFi->mTimeStamp << ','
                 << 1e9 * pKFj->mTimeStamp << '\n';
         }
         covisFile.flush();
  
         // ==============================================================
-        // 3. Loop closure edges export
+        // 4. Loop closure edges export
         //    GetLoopEdges() returns the set of KFs connected to pKFi
         //    specifically through loop closure (not regular covisibility).
         //    These are the highest-value edges for your reconstruction
@@ -2702,12 +2703,39 @@ void LoopClosing::exportLoopClosureInfo(KeyFrame* pCurrentKF, KeyFrame* pMatched
             if (writtenLoopEdges.count(edgeKey)) continue;  // already written
             writtenLoopEdges.insert(edgeKey);
  
+            // ---------------------------------------------------------
+            // Relative pose T_ij = T_iw * T_wj  (camera frame)
+            //   T_iw = pKFi->GetPose()         — world -> cam_i
+            //   T_wj = pKFj->GetPoseInverse()  — cam_j -> world
+            //   T_ij                           — cam_j expressed in cam_i frame
+            //
+            // Note: id_min/id_max reorder the pair but we always log
+            // the pose of the LARGER-id keyframe relative to SMALLER-id.
+            // Keep this convention consistent in your reconstruction pipeline.
+            // ---------------------------------------------------------
+            const Sophus::SE3<float> T_iw = pKFi->GetPose();
+            const Sophus::SE3<float> T_wj = pKFj->GetPoseInverse();
+            const Sophus::SE3<float> T_ij = T_iw * T_wj;
+ 
+            const Eigen::Vector3f    rel_t = T_ij.translation();
+            const Eigen::Quaternionf rel_q = T_ij.unit_quaternion();
+            // Lie algebra log — compact axis-angle representation [rad]
+            const Eigen::Vector3f    rel_r = T_ij.so3().log();
+ 
             loopEdgeFile
                 << id_min << ','
                 << id_max << ','
-                << std::setprecision(0)
+                << std::setprecision(6)
                 << 1e9 * pKFi->mTimeStamp << ','
-                << 1e9 * pKFj->mTimeStamp << '\n';
+                << 1e9 * pKFj->mTimeStamp << ','
+                << std::setprecision(9)
+                // relative translation [m]
+                << rel_t.x() << ',' << rel_t.y() << ',' << rel_t.z() << ','
+                // relative rotation as quaternion [qx qy qz qw]
+                << rel_q.x() << ',' << rel_q.y() << ','
+                << rel_q.z() << ',' << rel_q.w() << ','
+                // relative rotation as Lie algebra rotation vector [rad]
+                << rel_r.x() << ',' << rel_r.y() << ',' << rel_r.z() << '\n';
         }
         loopEdgeFile.flush();
  
