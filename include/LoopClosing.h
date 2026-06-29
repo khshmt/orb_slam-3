@@ -33,6 +33,8 @@
 #include <mutex>
 #include "Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h"
 
+#include <filesystem>
+
 namespace ORB_SLAM3
 {
 
@@ -46,7 +48,7 @@ static void openOnce(std::ofstream& f,
                      const std::string& path,
                      const std::string& header) {
     if (!f.is_open()) {
-        f.open(path, std::ios::out);
+        f.open(path, std::ios::out | std::ios::trunc);
         f << header << '\n';
         f << std::fixed;
     }

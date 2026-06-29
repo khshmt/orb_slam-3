@@ -115,12 +115,8 @@ int main(int argc, char **argv)
   // Stop all threads
   SLAM.Shutdown();
 
-  // Save camera trajectory
-  SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory_TUM_Format.txt");
-  SLAM.SaveTrajectoryTUM("FrameTrajectory_TUM_Format.txt");
-  
-  SLAM.SaveKeyFrameTrajectoryEuRoC("KeyFrameTrajectory_EuRoC_Format.txt");
-  SLAM.SaveTrajectoryEuRoC("FrameTrajectory_EuRoC_Format.txt");  
+  if(sync_thread.joinable())
+    sync_thread.join();
 
   ros::shutdown();
 
@@ -174,7 +170,7 @@ cv::Mat ImageGrabber::GetImage(const sensor_msgs::ImageConstPtr &img_msg)
 void ImageGrabber::SyncWithImu()
 {
   const double maxTimeDiff = 0.01;
-  while(1)
+  while(!mpSLAM->isShutDown())
   {
     cv::Mat imLeft, imRight;
     double tImLeft = 0, tImRight = 0;
