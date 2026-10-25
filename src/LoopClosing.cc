@@ -2598,7 +2598,7 @@ void LoopClosing::exportLoopClosureInfo(KeyFrame* pCurrentKF,
       Sophus::SE3f Twb = pKFi->GetImuPose();
       Eigen::Quaternionf q = Twb.unit_quaternion();
       Eigen::Vector3f twb = Twb.translation();
-      kfFile << setprecision(6) << 1e9 * pKFi->mTimeStamp << ' '
+      kfFile << static_cast<uint64_t>(round(pKFi->mTimeStamp * 1e+9)) << ' '
              << setprecision(9) << twb(0) << ' ' << twb(1) << ' ' << twb(2)
              << ' ' << q.x() << ' ' << q.y() << ' ' << q.z() << ' ' << q.w()
              << '\n';
@@ -2607,7 +2607,7 @@ void LoopClosing::exportLoopClosureInfo(KeyFrame* pCurrentKF,
       Sophus::SE3f Twc = pKFi->GetPoseInverse();
       Eigen::Quaternionf q = Twc.unit_quaternion();
       Eigen::Vector3f t = Twc.translation();
-      kfFile << setprecision(6) << 1e9 * pKFi->mTimeStamp << ' '
+      kfFile << static_cast<uint64_t>(round(pKFi->mTimeStamp * 1e+9)) << ' '
              << setprecision(9) << t(0) << ' ' << t(1) << ' ' << t(2) << ' '
              << q.x() << ' ' << q.y() << ' ' << q.z() << ' ' << q.w() << '\n';
     }
@@ -2628,10 +2628,11 @@ void LoopClosing::exportLoopClosureInfo(KeyFrame* pCurrentKF,
       // Covariance diagonal
       const auto& C = pKFi->mpImuPreintegrated->C;
 
-      preintFile << pKFi->mnId << ',' << std::setprecision(6)
-                 << 1e9 * pKFi->mPrevKF->mTimeStamp << ','
-                 << 1e9 * pKFi->mTimeStamp << ',' << std::setprecision(9)
-                 << pKFi->mpImuPreintegrated->dT
+      preintFile << pKFi->mnId << ','
+                 << static_cast<uint64_t>(
+                      round(pKFi->mPrevKF->mTimeStamp * 1e+9))
+                 << ',' << static_cast<uint64_t>(round(pKFi->mTimeStamp * 1e+9))
+                 << ',' << std::setprecision(9) << pKFi->mpImuPreintegrated->dT
                  << ','
                  // delta position
                  << dP[0] << ',' << dP[1] << ',' << dP[2]
@@ -2668,8 +2669,8 @@ void LoopClosing::exportLoopClosureInfo(KeyFrame* pCurrentKF,
       const int nShared = pKFi->GetWeight(pKFj);
 
       covisFile << pKFi->mnId << ',' << pKFj->mnId << ',' << nShared << ','
-                << std::setprecision(6) << 1e9 * pKFi->mTimeStamp << ','
-                << 1e9 * pKFj->mTimeStamp << '\n';
+                << static_cast<uint64_t>(round(pKFi->mTimeStamp * 1e+9)) << ','
+                << static_cast<uint64_t>(round(pKFj->mTimeStamp * 1e+9)) << '\n';
     }
     covisFile.flush();
 
@@ -2719,8 +2720,10 @@ void LoopClosing::exportLoopClosureInfo(KeyFrame* pCurrentKF,
       // Lie algebra log — compact axis-angle representation [rad]
       const Eigen::Vector3f rel_r = T_ij.so3().log();
 
-      loopEdgeFile << id_min << ',' << id_max << ',' << std::setprecision(6)
-                   << 1e9 * pKFi->mTimeStamp << ',' << 1e9 * pKFj->mTimeStamp
+      loopEdgeFile << id_min << ',' << id_max << ','
+                   << static_cast<uint64_t>(round(pKFi->mTimeStamp * 1e+9))
+                   << ','
+                   << static_cast<uint64_t>(round(pKFj->mTimeStamp * 1e+9))
                    << ','
                    << std::setprecision(9)
                    // relative translation [m]
