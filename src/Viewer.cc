@@ -363,10 +363,10 @@ void Viewer::Run()
             mpSystem->Shutdown();
 
             // Save camera trajectory
-            mpSystem->SaveTrajectoryEuRoC("CameraTrajectory_EuRoC.txt");
-            mpSystem->SaveKeyFrameTrajectoryEuRoC("KeyFrameTrajectory_EuRoC.txt");
+            mpSystem->SaveTrajectoryEuRoC("FrameTrajectory_EuRoC.csv");
+            mpSystem->SaveKeyFrameTrajectoryEuRoC("KeyFrameTrajectory_EuRoC.csv");
 
-            mpSystem->SaveTrajectoryTUM("CameraTrajectory_TUM.txt");
+            mpSystem->SaveTrajectoryTUM("FrameTrajectory_TUM.txt");
             mpSystem->SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory_TUM.txt");
 
             menuStop = false;
