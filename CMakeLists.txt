@@ -6,17 +6,14 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF()
 
 if(DEFINED ENV{CMAKE_BUILD_PARALLEL_LEVEL} AND NOT "$ENV{CMAKE_BUILD_PARALLEL_LEVEL}" STREQUAL "")
-    set(PARALLEL_JOBS "$ENV{CMAKE_BUILD_PARALLEL_LEVEL}")
+    set(CMAKE_BUILD_PARALLEL_LEVEL "$ENV{CMAKE_BUILD_PARALLEL_LEVEL}")
 else()
     # Optional fallback: detect the number of logical CPU cores
     cmake_host_system_information(RESULT PARALLEL_JOBS QUERY NUMBER_OF_LOGICAL_CORES)
     # divide by 2 to avoid overloading the system
-    math(EXPR RESULT "${PARALLEL_JOBS} / 2")
-    set(PARALLEL_JOBS ${RESULT})
+    math(EXPR CMAKE_BUILD_PARALLEL_LEVEL "${PARALLEL_JOBS} / 2")
 endif()
-
-message(STATUS "Configured parallel jobs: ${PARALLEL_JOBS}")
-
+message(STATUS "Configured parallel jobs: ${CMAKE_BUILD_PARALLEL_LEVEL}")
 
 MESSAGE("Build type: " ${CMAKE_BUILD_TYPE})
 
